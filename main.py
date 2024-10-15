@@ -662,6 +662,7 @@ def Parameter_update():
                                       0xFF]
                             WriteFrame(Buffer)
                             ReadFrame()
+            RxData.clear()
             Error_parameter.clear()
     Buffer = [0x7F, 0x04, 0x2E, 0xA6, 0x3D, 0x00, 0xFF, 0xFF]  # cnt软硬件计数清零
     WriteFrame(Buffer)

@@ -1,5 +1,6 @@
+import os
+from PyQt5.QtWidgets import QApplication, QMainWindow
 from ParameterRead import Ui_MainWindow
-from PyQt5.Qt import *
 import sys
 from time import sleep
 from usb_device import *
@@ -142,7 +143,12 @@ def WakeUp():
 
 
 def text_create(name, msg):
-    full_path = name + '.txt'  # 也可以创建一个.doc的word文档
+    path = 'ParameterRead_record'
+    # 检查文件夹是否存在，如果不存在则创建
+    if not os.path.exists(path):
+        os.makedirs(path)
+    # 构建完整的文件路径
+    full_path = os.path.join(path, name + '.txt')
     with open(full_path, 'a') as file:
         file.write(msg)
     file.close()
@@ -230,14 +236,17 @@ def ReadAllParameter():
                 if current_text == "355":
                     Check_RxData = copy.deepcopy(Info_355)
                     print('版本355参数有差异的名称：')
+                    ConsoleDisplay('版本355参数有差异的名称：')
                 # 版本号为 355A
                 if current_text == "355A":
                     Check_RxData = copy.deepcopy(Info_355A)
-                    print('版本355参数有差异的名称：')
+                    print('版本355A参数有差异的名称：')
+                    ConsoleDisplay('版本355A参数有差异的名称：')
                 # 版本号为 355B
                 if current_text == "355B":
                     Check_RxData = copy.deepcopy(Info_355B)
-                    print('版本355参数有差异的名称：')
+                    print('版本355B参数有差异的名称：')
+                    ConsoleDisplay('版本355B参数有差异的名称：')
                     # 对比当前读到的参数和标准的参数，并将有差异的键提出
 
                 diff = Check_RxData.keys() & current_RxData
@@ -246,6 +255,8 @@ def ReadAllParameter():
                         diff_vals = (k, Check_RxData[k], current_RxData[k])
                         Error_sign += 1
                         print(diff_vals)
+                        ui.textEdit.insertPlainText(diff_vals[0])
+                        ui.textEdit.insertPlainText('\n')
                         Error_parameter.append(diff_vals[0])
 
                 # 计算RGB的值，进行单独校验
@@ -255,9 +266,10 @@ def ReadAllParameter():
                         (18000 <= current_RxData['StClibColor_R_Y']) or (current_RxData['StClibColor_R_Y'] <= 8000)):
                     print("StClib Color(R):", current_RxData['StClibColor_R_x'], current_RxData['StClibColor_R_y'],
                           current_RxData['StClibColor_R_Y'])
-                    ui.lineEdit_4.setText(current_RxData['StClibColor_R_x'])
-                    ui.lineEdit_5.setText(current_RxData['StClibColor_R_y'])
-                    ui.lineEdit_6.setText(current_RxData['StClibColor_R_Y'])
+                    ConsoleDisplay("StClib Color(R)")
+                    ui.lineEdit_4.setText(str(current_RxData['StClibColor_R_x']))
+                    ui.lineEdit_5.setText(str(current_RxData['StClibColor_R_y']))
+                    ui.lineEdit_6.setText(str(current_RxData['StClibColor_R_Y']))
                     Error_sign += 1
                 #  Green 标定值
                 if ((2200 <= current_RxData['StClibColor_G_x']) or (current_RxData['StClibColor_G_x'] <= 1200) or
@@ -265,9 +277,10 @@ def ReadAllParameter():
                         (30000 <= current_RxData['StClibColor_G_Y']) or (current_RxData['StClibColor_G_Y'] <= 20000)):
                     print("StClibColor(G):", current_RxData['StClibColor_G_x'], current_RxData['StClibColor_G_y'],
                           current_RxData['StClibColor_G_Y'])
-                    ui.lineEdit_9.setText(current_RxData['StClibColor_G_x'])
-                    ui.lineEdit_8.setText(current_RxData['StClibColor_G_y'])
-                    ui.lineEdit_7.setText(current_RxData['StClibColor_G_Y'])
+                    ConsoleDisplay("StClib Color(G)")
+                    ui.lineEdit_9.setText(str(current_RxData['StClibColor_G_x']))
+                    ui.lineEdit_8.setText(str(current_RxData['StClibColor_G_y']))
+                    ui.lineEdit_7.setText(str(current_RxData['StClibColor_G_Y']))
                     Error_sign += 1
                 #  Blue 标定值
                 if ((2000 <= current_RxData['StClibColor_B_x']) or (current_RxData['StClibColor_B_x'] <= 1000) or
@@ -275,9 +288,10 @@ def ReadAllParameter():
                         (5000 <= current_RxData['StClibColor_B_Y']) or (current_RxData['StClibColor_B_Y'] <= 2000)):
                     print("StClibColor(B):", current_RxData['StClibColor_B_x'], current_RxData['StClibColor_B_y'],
                           current_RxData['StClibColor_B_Y'])
-                    ui.lineEdit_12.setText(current_RxData['StClibColor_B_x'])
-                    ui.lineEdit_11.setText(current_RxData['StClibColor_B_y'])
-                    ui.lineEdit_10.setText(current_RxData['StClibColor_B_Y'])
+                    ConsoleDisplay("StClib Color(B)")
+                    ui.lineEdit_12.setText(str(current_RxData['StClibColor_B_x']))
+                    ui.lineEdit_11.setText(str(current_RxData['StClibColor_B_y']))
+                    ui.lineEdit_10.setText(str(current_RxData['StClibColor_B_Y']))
                     Error_sign += 1
 
                 # 检查开发者模式，进行单独校验
@@ -285,13 +299,14 @@ def ReadAllParameter():
                 if WriteFrame(Buffer) == LIN_EX_PASS:
                     ReadFrame()
                     developMode.extend(CheckRxLINMsg.Data[2:8])
-                    if developMode[0] != 34 or developMode[1] != 34 or developMode[2] != 166 or developMode[3] != 19:
+                    if developMode[0] != 34 or developMode[1] != 166 or developMode[2] != 19 or developMode[3] != 255:
                         print("developMode:有反馈")
                         print(developMode)
                         Error_sign += 1
                 if Error_sign == 0:
                     print('参数校验正确')
                     ui.lineEdit.setText('参数校验正确')
+                    ConsoleDisplay('参数校验正确')
                 else:
                     print('有 %d 个参数错误' % Error_sign)
                     print(Error_parameter)
@@ -330,7 +345,14 @@ def Parameter_update():
         'error_NVM': 0x22,
         's_int_software_reset_cnt': 0x3D,
         's_int_hardware_reset_cnt': 0x3E,
+        'PartNo':0x33,
+        'HW ver':0x35,
+        'calibration_flag':0x41,
+        'brightness adjust':0x42
     }
+    if not RxData:
+        ui.lineEdit_2.setText("请先校验参数")
+        return
     # 将SW的checksum计算
     input_data = [RxData[3], RxData[4], RxData[5], RxData[6], RxData[7], RxData[8],
                   Check_RxData['Coordinate Shift X_bak'], Check_RxData['Coordinate Shift Y_bak'],
@@ -360,22 +382,37 @@ def Parameter_update():
                 for num in DID_NVM.keys():
                     if Error_num == num:
                         print(hex(DID_NVM[Error_num]).upper())
+                        # p_log_dimmramape_L 有差异
                         if Error_num == 'p_log_dimmramape_L':
                             Buffer = [0x7F, 0x10, 0x08, 0x2E, 0xA6, DID_NVM[Error_num], 0x01, 0x04]
                             WriteFrame(Buffer)
-                            ReadFrame()
                             Buffer = [0x7F, 0x21, 0x0D, 0x1A, 0x2E, 0xFF, 0xFF, 0xFF]
                             WriteFrame(Buffer)
                             ReadFrame()
+                        # p_log_dimmramape_H 有差异
                         elif Error_num == 'p_log_dimmramape_H':
                             Buffer = [0x7F, 0x10, 0x07, 0x2E, 0xA6, DID_NVM[Error_num], 0x47, 0x69]
                             WriteFrame(Buffer)
-                            ReadFrame()
                             Buffer = [0x7F, 0x21, 0x91, 0xC4, 0xFF, 0xFF, 0xFF, 0xFF]
                             WriteFrame(Buffer)
                             ReadFrame()
-                        elif Error_num == 'Coordinate Shift X_bak' or Error_num == 'Coordinate Shift Y_bak':
+                        # PartNo 有差异
+                        elif Error_num == 'PartNo':
+                            sleep(0.1)
+                            Buffer = [0x7F, 0x10, 0x0D, 0x2E, 0xA6, DID_NVM[Error_num], 0x38, 0x35]
+                            WriteFrame(Buffer)
+                            Buffer = [0x7F, 0x21, 0x44, 0x39, 0x34, 0x37, 0x33, 0x35]
+                            WriteFrame(Buffer)
+                            Buffer = [0x7F, 0x22, 0x35, Check_RxData['PartNo'][9], 0xFF, 0xFF, 0xFF, 0xFF]
+                            WriteFrame(Buffer)
+                            ReadFrame()
+                        # HW ver 有差异
+                        elif Error_num == 'HW ver':
+                            Buffer = [0x7F, 0x06, 0x2E, 0xA6, DID_NVM[Error_num], 0x48, 0x30, 0x32]
+                            WriteFrame(Buffer)
+                            ReadFrame()
                             # 超出范围的SW Parameters 更新
+                        elif Error_num == 'Coordinate Shift X_bak' or Error_num == 'Coordinate Shift Y_bak' :
                             Buffer = [0x7F, 0x06, 0xB2, 0x33, 0x13, 0x00, 0xFE, 0xCA]  # 进入底层开发者模式
                             # 报文发送成功
                             if WriteFrame(Buffer) == LIN_EX_PASS:
@@ -398,7 +435,8 @@ def Parameter_update():
                                             Buffer = [0x7F, 0x10, 0x0A, 0xB4, 0xD3, Check_RxData['RomValid Flag msb'],
                                                       Check_RxData['RomValid Flag lsb'], RxData[5]]
                                             WriteFrame(Buffer)
-                                            Buffer = [0x7F, 0x21, RxData[6], RxData[7], RxData[8],
+                                            Buffer = [0x7F, 0x21, RxData[6], RxData[7],
+                                                      RxData[8],
                                                       Check_RxData['Coordinate Shift X_bak'],
                                                       Check_RxData['Coordinate Shift Y_bak'], 0xFF]
                                             WriteFrame(Buffer)

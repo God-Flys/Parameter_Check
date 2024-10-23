@@ -356,8 +356,13 @@ def Parameter_update():
     # 将SW的checksum计算
     input_data = [RxData[3], RxData[4], RxData[5], RxData[6], RxData[7], RxData[8],
                   Check_RxData['Coordinate Shift X_bak'], Check_RxData['Coordinate Shift Y_bak'],
-                  RxData[11], 0x0A, 0X01, 0x32, 0x04, 0x01, 0x04, 0x0D,
-                  0x1A, 0x2E, 0x47, 0x69, 0x91, 0xC4, RxData[25]]
+                  RxData[11], Check_RxData['DimmingWhen0'], Check_RxData['DimmingFactor'],
+                  Check_RxData['gotoSleepDimmingTime'], Check_RxData['waiteForGotoSleep'],
+                  Check_RxData['p_log_dimmramape_L'][0], Check_RxData['p_log_dimmramape_L'][1],
+                  Check_RxData['p_log_dimmramape_L'][2], Check_RxData['p_log_dimmramape_L'][3],
+                  Check_RxData['p_log_dimmramape_L'][4], Check_RxData['p_log_dimmramape_H'][0],
+                  Check_RxData['p_log_dimmramape_H'][1], Check_RxData['p_log_dimmramape_H'][2],
+                  Check_RxData['p_log_dimmramape_H'][3], RxData[25]]
     crc_result = calc_crc8_0x97(input_data)
     Buffer = [0x7F, 0x04, 0x2E, 0xA6, 0x13, 0x01, 0xFF, 0xFF]
     if WriteFrame(Buffer) == LIN_EX_PASS:
@@ -384,16 +389,21 @@ def Parameter_update():
                         print(hex(DID_NVM[Error_num]).upper())
                         # p_log_dimmramape_L 有差异
                         if Error_num == 'p_log_dimmramape_L':
-                            Buffer = [0x7F, 0x10, 0x08, 0x2E, 0xA6, DID_NVM[Error_num], 0x01, 0x04]
+                            Buffer = [0x7F, 0x10, 0x08, 0x2E, 0xA6, DID_NVM[Error_num],
+                                      Check_RxData['p_log_dimmramape_L'][0], Check_RxData['p_log_dimmramape_L'][1],]
                             WriteFrame(Buffer)
-                            Buffer = [0x7F, 0x21, 0x0D, 0x1A, 0x2E, 0xFF, 0xFF, 0xFF]
+                            Buffer = [0x7F, 0x21,
+                                      Check_RxData['p_log_dimmramape_L'][2], Check_RxData['p_log_dimmramape_L'][3],
+                                      Check_RxData['p_log_dimmramape_L'][4], 0xFF, 0xFF, 0xFF]
                             WriteFrame(Buffer)
                             ReadFrame()
                         # p_log_dimmramape_H 有差异
                         elif Error_num == 'p_log_dimmramape_H':
-                            Buffer = [0x7F, 0x10, 0x07, 0x2E, 0xA6, DID_NVM[Error_num], 0x47, 0x69]
+                            Buffer = [0x7F, 0x10, 0x07, 0x2E, 0xA6, DID_NVM[Error_num],
+                                      Check_RxData['p_log_dimmramape_H'][0], Check_RxData['p_log_dimmramape_H'][1]]
                             WriteFrame(Buffer)
-                            Buffer = [0x7F, 0x21, 0x91, 0xC4, 0xFF, 0xFF, 0xFF, 0xFF]
+                            Buffer = [0x7F, 0x21, Check_RxData['p_log_dimmramape_H'][2],
+                                      Check_RxData['p_log_dimmramape_H'][3], 0xFF, 0xFF, 0xFF, 0xFF]
                             WriteFrame(Buffer)
                             ReadFrame()
                         # PartNo 有差异
@@ -449,16 +459,22 @@ def Parameter_update():
                                                       Check_RxData['DimmingWhen0'], Check_RxData['DimmingFactor']]
                                             WriteFrame(Buffer)
                                             Buffer = [0x7F, 0x21, Check_RxData['gotoSleepDimmingTime'],
-                                                      Check_RxData['waiteForGotoSleep'], 0x01, 0x04, 0x0D, 0xFF]
+                                                      Check_RxData['waiteForGotoSleep'],
+                                                      Check_RxData['p_log_dimmramape_L'][0],
+                                                      Check_RxData['p_log_dimmramape_L'][1],
+                                                      Check_RxData['p_log_dimmramape_L'][2],  0xFF]
                                             WriteFrame(Buffer)
                                             ReadFrame()
                                             Buffer = [0x7F, 0x06, 0xB4, 0x47, 0x08, 0x50, 0x00, 0x08]  # 写 EEPROM
                                             WriteFrame(Buffer)
                                             ReadFrame()
                                             # 写 DATA
-                                            Buffer = [0x7F, 0x10, 0x0A, 0xB4, 0xD3, 0x1A, 0x2E, 0x47]
+                                            Buffer = [0x7F, 0x10, 0x0A, 0xB4, 0xD3, Check_RxData['p_log_dimmramape_L'][3],
+                                                      Check_RxData['p_log_dimmramape_L'][4], Check_RxData['p_log_dimmramape_H'][0]]
                                             WriteFrame(Buffer)
-                                            Buffer = [0x7F, 0x21, 0x69, 0x91, 0xC4, 0xFF, crc_result, 0xFF]
+                                            Buffer = [0x7F, 0x21, Check_RxData['p_log_dimmramape_H'][1],
+                                                      Check_RxData['p_log_dimmramape_H'][2],
+                                                      Check_RxData['p_log_dimmramape_H'][3], 0xFF, crc_result, 0xFF]
                                             WriteFrame(Buffer)
                                             ReadFrame()
                                             Buffer = [0x7F, 0x03, 0xB4, 0xC1, 0xFF, 0xFF, 0xFF, 0xFF]

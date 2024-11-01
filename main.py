@@ -1,5 +1,6 @@
 import os
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from click import clear
 from ParameterRead import Ui_MainWindow
 import sys
 from time import sleep
@@ -25,6 +26,7 @@ Error_parameter = []
 def ConsoleDisplay(str):
     ui.textEdit.insertPlainText(str)
     ui.textEdit.insertPlainText('\n')
+    ui.textEdit.ensureCursorVisible()
 
 
 class DeviceOperate():
@@ -156,6 +158,7 @@ def text_create(name, msg):
 
 def ReadAllParameter():
     global RxData  # 读取到的数据
+    RxDatas = [] # 当前读取到的数据
     global Check_RxData  # 校验的标准参数数据
     global Error_parameter
     developMode = []  # 通过诊断方式读取的数据
@@ -170,56 +173,56 @@ def ReadAllParameter():
             if WriteFrame(Buffer) == LIN_EX_PASS:
                 for n in range(0, 22):
                     ReadFrame()
-                    RxData.extend(CheckRxLINMsg.Data[2:8])
+                    RxDatas.extend(CheckRxLINMsg.Data[2:8])
+                RxData.extend(RxDatas)
                 # 当前读取到的参数数据
-                current_RxData = {'RomValid Flag msb': RxData[3],
-                                  'RomValid Flag lsb': RxData[4],
-                                  'Brightness Adjustment': RxData[8] & 0x7F,
-                                  'DimmingType': RxData[8] >> 8,
-                                  'Coordinate Shift X_bak': RxData[9],
-                                  'Coordinate Shift Y_bak': RxData[10],
-                                  'DimmingWhen0': RxData[12],
-                                  'DimmingFactor': RxData[13],
-                                  'gotoSleepDimmingTime': RxData[14],
-                                  'waiteForGotoSleep': RxData[15],
-                                  'p_log_dimmramape_L': RxData[16:21],
-                                  'p_log_dimmramape_H': RxData[21:25],
-                                  'NAD_EOL': RxData[27],
-                                  'NAD_write': RxData[28],
-                                  'NAD_AA': RxData[29],
-                                  'NAD_Sel': RxData[30],
-                                  'short_R': RxData[35],
-                                  'short_G': RxData[36],
-                                  'short_B': RxData[37],
-                                  'open_R': RxData[38],
-                                  'open_G': RxData[39],
-                                  'open_B': RxData[40],
-                                  'error_RAM': RxData[41],
-                                  'error_ROM': RxData[42],
-                                  'error_NVM': RxData[43],
+                current_RxData = {'RomValid Flag msb': RxDatas[3],
+                                  'RomValid Flag lsb': RxDatas[4],
+                                  'Brightness Adjustment': RxDatas[8] & 0x7F,
+                                  'DimmingType': RxDatas[8] >> 8,
+                                  'Coordinate Shift X_bak': RxDatas[9],
+                                  'Coordinate Shift Y_bak': RxDatas[10],
+                                  'DimmingWhen0': RxDatas[12],
+                                  'DimmingFactor': RxDatas[13],
+                                  'gotoSleepDimmingTime': RxDatas[14],
+                                  'waiteForGotoSleep': RxDatas[15],
+                                  'p_log_dimmramape_L': RxDatas[16:21],
+                                  'p_log_dimmramape_H': RxDatas[21:25],
+                                  'NAD_EOL': RxDatas[27],
+                                  'NAD_write': RxDatas[28],
+                                  'NAD_AA': RxDatas[29],
+                                  'NAD_Sel': RxDatas[30],
+                                  'short_R': RxDatas[35],
+                                  'short_G': RxDatas[36],
+                                  'short_B': RxDatas[37],
+                                  'open_R': RxDatas[38],
+                                  'open_G': RxDatas[39],
+                                  'open_B': RxDatas[40],
+                                  'error_RAM': RxDatas[41],
+                                  'error_ROM': RxDatas[42],
+                                  'error_NVM': RxDatas[43],
                                   's_int_software_reset_cnt': 0,
                                   's_int_hardware_reset_cnt': 0,
-                                  'SerialNo': RxData[51:59],
-                                  'PartNo': RxData[59:69],
-                                  'HW ver': RxData[69:72],
-                                  'StClibColor_R_x': (RxData[75] + RxData[76] * 256),
-                                  'StClibColor_R_y': (RxData[77] + RxData[78] * 256),
-                                  'StClibColor_R_Y': (RxData[79] + RxData[80] * 256),
-                                  'StClibColor_G_x': (RxData[81] + RxData[82] * 256),
-                                  'StClibColor_G_y': (RxData[83] + RxData[84] * 256),
-                                  'StClibColor_G_Y': (RxData[85] + RxData[86] * 256),
-                                  'StClibColor_B_x': (RxData[87] + RxData[88] * 256),
-                                  'StClibColor_B_y': (RxData[89] + RxData[90] * 256),
-                                  'StClibColor_B_Y': (RxData[91] + RxData[92] * 256),
-                                  'calibration_flag': RxData[93],
-                                  'brightness adjust': RxData[94],
+                                  'SerialNo': RxDatas[51:59],
+                                  'PartNo': RxDatas[59:69],
+                                  'HW ver': RxDatas[69:72],
+                                  'StClibColor_R_x': (RxDatas[75] + RxDatas[76] * 256),
+                                  'StClibColor_R_y': (RxDatas[77] + RxDatas[78] * 256),
+                                  'StClibColor_R_Y': (RxDatas[79] + RxDatas[80] * 256),
+                                  'StClibColor_G_x': (RxDatas[81] + RxDatas[82] * 256),
+                                  'StClibColor_G_y': (RxDatas[83] + RxDatas[84] * 256),
+                                  'StClibColor_G_Y': (RxDatas[85] + RxDatas[86] * 256),
+                                  'StClibColor_B_x': (RxDatas[87] + RxDatas[88] * 256),
+                                  'StClibColor_B_y': (RxDatas[89] + RxDatas[90] * 256),
+                                  'StClibColor_B_Y': (RxDatas[91] + RxDatas[92] * 256),
+                                  'calibration_flag': RxDatas[93],
+                                  'brightness adjust': RxDatas[94],
                                   }
                 # save read data
                 # Step 1 create txt name: using data and SerialNo
                 txtname = ''
                 now = time.localtime()
-                txtname = str(now.tm_year) + str(now.tm_mon) + str(now.tm_mday) + str(now.tm_hour) + str(
-                    now.tm_min) + '_SN'
+                txtname = f"{now.tm_year}-{now.tm_mon:02d}-{now.tm_mday:02d}-{now.tm_hour:02d}-{now.tm_min:02d}-{now.tm_sec:02d}"+ '_SN'
                 for n in range(0, 8):
                     txtname = str(txtname) + str(current_RxData['SerialNo'][n]).zfill(2)
                     # Step 2 write Rxdata into txt
@@ -255,8 +258,13 @@ def ReadAllParameter():
                         diff_vals = (k, Check_RxData[k], current_RxData[k])
                         Error_sign += 1
                         print(diff_vals)
-                        ui.textEdit.insertPlainText(diff_vals[0])
-                        ui.textEdit.insertPlainText('\n')
+                        # 确保diff_vals列表中的元素都是字符串
+                        str_diff_vals = [str(val) for val in diff_vals]
+                        # 插入文本
+                        ui.textEdit_2.insertPlainText(
+                            '参数:' + str_diff_vals[0] +'\n'+'标准值:' + str_diff_vals[1] +'\n'+'当前值:' + str_diff_vals[2])
+                        ui.textEdit_2.insertPlainText('\n')
+                        ui.textEdit.insertPlainText(diff_vals[0]+'\n')
                         Error_parameter.append(diff_vals[0])
 
                 # 计算RGB的值，进行单独校验
@@ -274,7 +282,7 @@ def ReadAllParameter():
                 #  Green 标定值
                 if ((2200 <= current_RxData['StClibColor_G_x']) or (current_RxData['StClibColor_G_x'] <= 1200) or
                         (7800 <= current_RxData['StClibColor_G_y']) or (current_RxData['StClibColor_G_y'] <= 6800) or
-                        (30000 <= current_RxData['StClibColor_G_Y']) or (current_RxData['StClibColor_G_Y'] <= 20000)):
+                        (30000 <= current_RxData['StClibColor_G_Y']) or (current_RxData['StClibColor_G_Y'] <= 15000)):
                     print("StClibColor(G):", current_RxData['StClibColor_G_x'], current_RxData['StClibColor_G_y'],
                           current_RxData['StClibColor_G_Y'])
                     ConsoleDisplay("StClib Color(G)")
@@ -285,7 +293,7 @@ def ReadAllParameter():
                 #  Blue 标定值
                 if ((2000 <= current_RxData['StClibColor_B_x']) or (current_RxData['StClibColor_B_x'] <= 1000) or
                         (350 <= current_RxData['StClibColor_B_y']) or (current_RxData['StClibColor_B_y'] <= 150) or
-                        (5000 <= current_RxData['StClibColor_B_Y']) or (current_RxData['StClibColor_B_Y'] <= 2000)):
+                        (4000 <= current_RxData['StClibColor_B_Y']) or (current_RxData['StClibColor_B_Y'] <= 1900)):
                     print("StClibColor(B):", current_RxData['StClibColor_B_x'], current_RxData['StClibColor_B_y'],
                           current_RxData['StClibColor_B_Y'])
                     ConsoleDisplay("StClib Color(B)")
@@ -306,12 +314,15 @@ def ReadAllParameter():
                 if Error_sign == 0:
                     print('参数校验正确')
                     ui.lineEdit.setText('参数校验正确')
+                    ui.textEdit_2.clear()
+                    RxData.clear()
                     ConsoleDisplay('参数校验正确')
                 else:
                     print('有 %d 个参数错误' % Error_sign)
                     print(Error_parameter)
                     ui.lineEdit.setText('有 %d 个参数错误' % Error_sign)
-                print(RxData)
+                print(RxDatas)
+                RxDatas.clear()
         else:
             ConsoleDisplay("pls connect product!")
 

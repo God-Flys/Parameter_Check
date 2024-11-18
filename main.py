@@ -253,6 +253,7 @@ def ReadAllParameter():
                     # 对比当前读到的参数和标准的参数，并将有差异的键提出
 
                 diff = Check_RxData.keys() & current_RxData
+                ui.textEdit_2.clear()
                 for k in diff:
                     if Check_RxData[k] != current_RxData[k]:
                         diff_vals = (k, Check_RxData[k], current_RxData[k])
@@ -262,7 +263,7 @@ def ReadAllParameter():
                         str_diff_vals = [str(val) for val in diff_vals]
                         # 插入文本
                         ui.textEdit_2.insertPlainText(
-                            '参数:' + str_diff_vals[0] +'\n'+'标准值:' + str_diff_vals[1] +'\n'+'当前值:' + str_diff_vals[2])
+                            '参数:' + str_diff_vals[0]+'\n'+'标准值:'+str_diff_vals[1] +'\n'+'当前值:' + str_diff_vals[2])
                         ui.textEdit_2.insertPlainText('\n')
                         ui.textEdit.insertPlainText(diff_vals[0]+'\n')
                         Error_parameter.append(diff_vals[0])
@@ -314,13 +315,15 @@ def ReadAllParameter():
                 if Error_sign == 0:
                     print('参数校验正确')
                     ui.lineEdit.setText('参数校验正确')
-                    ui.textEdit_2.clear()
+                    ui.textEdit_2.setStyleSheet("background-color:green")
+                    ui.textEdit_2.setText("校验合格")
                     RxData.clear()
                     ConsoleDisplay('参数校验正确')
                 else:
                     print('有 %d 个参数错误' % Error_sign)
                     print(Error_parameter)
                     ui.lineEdit.setText('有 %d 个参数错误' % Error_sign)
+                    ui.textEdit_2.setStyleSheet("background-color:red")
                 print(RxDatas)
                 RxDatas.clear()
         else:
@@ -533,7 +536,9 @@ if __name__ == "__main__":
     MainWindow.show()
     device.ScanDevice()
     device.OpenDevice()
+
     ui.pushButton.clicked.connect(ReadAllParameter)
     ui.pushButton_2.clicked.connect(Parameter_update)
     ui.comboBox.addItems(['355', '355A', '355B'])
+    ReadAllParameter()
     sys.exit(app.exec_())

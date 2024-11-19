@@ -251,22 +251,55 @@ def ReadAllParameter():
                     print('版本355B参数有差异的名称：')
                     ConsoleDisplay('版本355B参数有差异的名称：')
                     # 对比当前读到的参数和标准的参数，并将有差异的键提出
+                if current_text == '355' or current_text == '355B':
+                    diff = Check_RxData.keys() & current_RxData
+                    ui.textEdit_2.clear()
+                    for k in diff:
+                        if Check_RxData[k] != current_RxData[k]:
+                            diff_vals = (k, Check_RxData[k], current_RxData[k])
+                            Error_sign += 1
+                            print(diff_vals)
+                            # 确保diff_vals列表中的元素都是字符串
+                            str_diff_vals = [str(val) for val in diff_vals]
+                            # 插入文本
+                            ui.textEdit_2.insertPlainText(
+                                '参数:' + str_diff_vals[0]+'\n'+'标准值:'+str_diff_vals[1] +'\n'+'当前值:' + str_diff_vals[2])
+                            ui.textEdit_2.insertPlainText('\n')
+                            ui.textEdit.insertPlainText(diff_vals[0]+'\n')
+                            Error_parameter.append(diff_vals[0])
+                if current_text == '355A':
+                    diff = Check_RxData.keys() & current_RxData
+                    ui.textEdit_2.clear()
+                    for k in diff:
+                        if k == 'Coordinate Shift X_bak' :
+                            if (0x5E < current_RxData['Coordinate Shift X_bak']) or (
+                                    current_RxData['Coordinate Shift X_bak'] < 0x3E):
+                                Error_sign += 1
+                                ui.textEdit.insertPlainText('白平衡偏移参数u' + '\n')
+                                ui.textEdit_2.insertPlainText('白平衡偏移参数u' + '\n')
+                                Error_parameter.append('Coordinate Shift X_bak')
+                        elif k == 'Coordinate Shift Y_bak':
+                            if (0xCA < current_RxData['Coordinate Shift Y_bak']) or (
+                                    current_RxData['Coordinate Shift Y_bak'] < 0xAA):
+                                Error_sign += 1
+                                ui.textEdit.insertPlainText('白平衡偏移参数v' + '\n')
+                                ui.textEdit_2.insertPlainText('白平衡偏移参数v' + '\n')
+                                Error_parameter.append('Coordinate Shift Y_bak')
 
-                diff = Check_RxData.keys() & current_RxData
-                ui.textEdit_2.clear()
-                for k in diff:
-                    if Check_RxData[k] != current_RxData[k]:
-                        diff_vals = (k, Check_RxData[k], current_RxData[k])
-                        Error_sign += 1
-                        print(diff_vals)
-                        # 确保diff_vals列表中的元素都是字符串
-                        str_diff_vals = [str(val) for val in diff_vals]
-                        # 插入文本
-                        ui.textEdit_2.insertPlainText(
-                            '参数:' + str_diff_vals[0]+'\n'+'标准值:'+str_diff_vals[1] +'\n'+'当前值:' + str_diff_vals[2])
-                        ui.textEdit_2.insertPlainText('\n')
-                        ui.textEdit.insertPlainText(diff_vals[0]+'\n')
-                        Error_parameter.append(diff_vals[0])
+                        else:
+                            if Check_RxData[k] != current_RxData[k]:
+                                diff_vals = (k, Check_RxData[k], current_RxData[k])
+                                Error_sign += 1
+                                print(diff_vals)
+                                # 确保diff_vals列表中的元素都是字符串
+                                str_diff_vals = [str(val) for val in diff_vals]
+                                # 插入文本
+                                ui.textEdit_2.insertPlainText(
+                                    '参数:' + str_diff_vals[0] + '\n' + '标准值:' + str_diff_vals[1] + '\n' + '当前值:' +
+                                    str_diff_vals[2])
+                                ui.textEdit_2.insertPlainText('\n')
+                                ui.textEdit.insertPlainText(diff_vals[0] + '\n')
+                                Error_parameter.append(diff_vals[0])
 
                 # 计算RGB的值，进行单独校验
                 #  Red 标定值

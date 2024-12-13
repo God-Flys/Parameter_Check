@@ -204,7 +204,7 @@ def ReadAllParameter():
                                   's_int_software_reset_cnt': 0,
                                   's_int_hardware_reset_cnt': 0,
                                   'SerialNo': RxDatas[51:59],
-                                  'PartNo': RxDatas[59:69],
+                                  '产品型号': RxDatas[59:69],
                                   'HW ver': RxDatas[69:72],
                                   'StClibColor_R_x': (RxDatas[75] + RxDatas[76] * 256),
                                   'StClibColor_R_y': (RxDatas[77] + RxDatas[78] * 256),
@@ -267,45 +267,29 @@ def ReadAllParameter():
                             ui.textEdit_2.insertPlainText('\n')
                             ui.textEdit.insertPlainText(diff_vals[0]+'\n')
                             Error_parameter.append(diff_vals[0])
+                # 355A 参数有范围值，需要和其它区分开
                 if current_text == '355A':
                     diff = Check_RxData.keys() & current_RxData
                     ui.textEdit_2.clear()
                     for k in diff:
-                        if k == 'Coordinate Shift X_bak' :
-                            if (0x5E < current_RxData['Coordinate Shift X_bak']) or (
-                                    current_RxData['Coordinate Shift X_bak'] < 0x3E):
-                                Error_sign += 1
-                                ui.textEdit.insertPlainText('白平衡偏移参数u' + '\n')
-                                ui.textEdit_2.insertPlainText('白平衡偏移参数u' + '\n')
-                                Error_parameter.append('Coordinate Shift X_bak')
-                        elif k == 'Coordinate Shift Y_bak':
-                            if (0xCA < current_RxData['Coordinate Shift Y_bak']) or (
-                                    current_RxData['Coordinate Shift Y_bak'] < 0xAA):
-                                Error_sign += 1
-                                ui.textEdit.insertPlainText('白平衡偏移参数v' + '\n')
-                                ui.textEdit_2.insertPlainText('白平衡偏移参数v' + '\n')
-                                Error_parameter.append('Coordinate Shift Y_bak')
-
-                        else:
-                            if Check_RxData[k] != current_RxData[k]:
-                                diff_vals = (k, Check_RxData[k], current_RxData[k])
-                                Error_sign += 1
-                                print(diff_vals)
-                                # 确保diff_vals列表中的元素都是字符串
-                                str_diff_vals = [str(val) for val in diff_vals]
-                                # 插入文本
-                                ui.textEdit_2.insertPlainText(
-                                    '参数:' + str_diff_vals[0] + '\n' + '标准值:' + str_diff_vals[1] + '\n' + '当前值:' +
-                                    str_diff_vals[2])
-                                ui.textEdit_2.insertPlainText('\n')
-                                ui.textEdit.insertPlainText(diff_vals[0] + '\n')
-                                Error_parameter.append(diff_vals[0])
-
+                        if Check_RxData[k] != current_RxData[k]:
+                            diff_vals = (k, Check_RxData[k], current_RxData[k])
+                            Error_sign += 1
+                            print(diff_vals)
+                            # 确保diff_vals列表中的元素都是字符串
+                            str_diff_vals = [str(val) for val in diff_vals]
+                            # 插入文本
+                            ui.textEdit_2.insertPlainText(
+                                '参数:' + str_diff_vals[0] + '\n' + '标准值:' + str_diff_vals[1] + '\n' + '当前值:' +
+                                str_diff_vals[2])
+                            ui.textEdit_2.insertPlainText('\n')
+                            ui.textEdit.insertPlainText(diff_vals[0] + '\n')
+                            Error_parameter.append(diff_vals[0])
                 # 计算RGB的值，进行单独校验
                 #  Red 标定值
                 if ((7500 <= current_RxData['StClibColor_R_x']) or (current_RxData['StClibColor_R_x'] <= 6500) or
                         (3500 <= current_RxData['StClibColor_R_y']) or (current_RxData['StClibColor_R_y'] <= 2500) or
-                        (18000 <= current_RxData['StClibColor_R_Y']) or (current_RxData['StClibColor_R_Y'] <= 8000)):
+                        (18000 <= current_RxData['StClibColor_R_Y']) or (current_RxData['StClibColor_R_Y'] <= 9000)):
                     print("StClib Color(R):", current_RxData['StClibColor_R_x'], current_RxData['StClibColor_R_y'],
                           current_RxData['StClibColor_R_Y'])
                     ConsoleDisplay("StClib Color(R)")
@@ -316,7 +300,7 @@ def ReadAllParameter():
                 #  Green 标定值
                 if ((2200 <= current_RxData['StClibColor_G_x']) or (current_RxData['StClibColor_G_x'] <= 1200) or
                         (7800 <= current_RxData['StClibColor_G_y']) or (current_RxData['StClibColor_G_y'] <= 6800) or
-                        (30000 <= current_RxData['StClibColor_G_Y']) or (current_RxData['StClibColor_G_Y'] <= 15000)):
+                        (30300 <= current_RxData['StClibColor_G_Y']) or (current_RxData['StClibColor_G_Y'] <= 15000)):
                     print("StClibColor(G):", current_RxData['StClibColor_G_x'], current_RxData['StClibColor_G_y'],
                           current_RxData['StClibColor_G_Y'])
                     ConsoleDisplay("StClib Color(G)")
@@ -327,7 +311,7 @@ def ReadAllParameter():
                 #  Blue 标定值
                 if ((2000 <= current_RxData['StClibColor_B_x']) or (current_RxData['StClibColor_B_x'] <= 1000) or
                         (350 <= current_RxData['StClibColor_B_y']) or (current_RxData['StClibColor_B_y'] <= 150) or
-                        (4000 <= current_RxData['StClibColor_B_Y']) or (current_RxData['StClibColor_B_Y'] <= 1900)):
+                        (4150 <= current_RxData['StClibColor_B_Y']) or (current_RxData['StClibColor_B_Y'] <= 1750)):
                     print("StClibColor(B):", current_RxData['StClibColor_B_x'], current_RxData['StClibColor_B_y'],
                           current_RxData['StClibColor_B_Y'])
                     ConsoleDisplay("StClib Color(B)")
@@ -573,5 +557,4 @@ if __name__ == "__main__":
     ui.pushButton.clicked.connect(ReadAllParameter)
     ui.pushButton_2.clicked.connect(Parameter_update)
     ui.comboBox.addItems(['355', '355A', '355B'])
-    ReadAllParameter()
     sys.exit(app.exec_())

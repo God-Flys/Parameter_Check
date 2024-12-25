@@ -179,7 +179,7 @@ def ReadAllParameter():
                 current_RxData = {'RomValid Flag msb': RxDatas[3],
                                   'RomValid Flag lsb': RxDatas[4],
                                   'Brightness Adjustment': RxDatas[8] & 0x7F,
-                                  'DimmingType': RxDatas[8] >> 8,
+                                  'DimmingType': RxDatas[8] >> 7,
                                   'Coordinate Shift X_bak': RxDatas[9],
                                   'Coordinate Shift Y_bak': RxDatas[10],
                                   'DimmingWhen0': RxDatas[12],
@@ -201,8 +201,8 @@ def ReadAllParameter():
                                   'error_RAM': RxDatas[41],
                                   'error_ROM': RxDatas[42],
                                   'error_NVM': RxDatas[43],
-                                  's_int_software_reset_cnt': 0,
-                                  's_int_hardware_reset_cnt': 0,
+                                  's_int_software_reset_cnt': RxDatas[44],
+                                  's_int_hardware_reset_cnt': RxDatas[45],
                                   'SerialNo': RxDatas[51:59],
                                   '产品型号': RxDatas[59:69],
                                   'HW ver': RxDatas[69:72],
@@ -345,7 +345,18 @@ def ReadAllParameter():
                 RxDatas.clear()
         else:
             ConsoleDisplay("pls connect product!")
-
+        Buffer = [0x7F, 0x03, 0xB4, 0xC1, 0xFF, 0xFF, 0xFF, 0xFF]
+        WriteFrame(Buffer)
+        ReadFrame()
+        Buffer = [0x7F, 0x04, 0x2E, 0xA6, 0x13, 0x01, 0xFF, 0xFF]
+        WriteFrame(Buffer)
+        ReadFrame()
+        Buffer = [0x7F, 0x04, 0x2E, 0xA6, 0x3D, 0x00, 0xFF, 0xFF]  # cnt软硬件计数清零
+        WriteFrame(Buffer)
+        ReadFrame()
+        Buffer = [0x7F, 0x04, 0x2E, 0xA6, 0x3E, 0x00, 0xFF, 0xFF]
+        WriteFrame(Buffer)
+        ReadFrame()
 
 def Parameter_update():
     WakeUp()
@@ -376,7 +387,7 @@ def Parameter_update():
         'error_NVM': 0x22,
         's_int_software_reset_cnt': 0x3D,
         's_int_hardware_reset_cnt': 0x3E,
-        'PartNo':0x33,
+        #'产品型号':0x33,   不能随意更改
         'HW ver':0x35,
         'calibration_flag':0x41,
         'brightness adjust':0x42
@@ -438,13 +449,13 @@ def Parameter_update():
                             WriteFrame(Buffer)
                             ReadFrame()
                         # PartNo 有差异
-                        elif Error_num == 'PartNo':
+                        elif Error_num == '产品型号':
                             sleep(0.1)
                             Buffer = [0x7F, 0x10, 0x0D, 0x2E, 0xA6, DID_NVM[Error_num], 0x38, 0x35]
                             WriteFrame(Buffer)
                             Buffer = [0x7F, 0x21, 0x44, 0x39, 0x34, 0x37, 0x33, 0x35]
                             WriteFrame(Buffer)
-                            Buffer = [0x7F, 0x22, 0x35, Check_RxData['PartNo'][9], 0xFF, 0xFF, 0xFF, 0xFF]
+                            Buffer = [0x7F, 0x22, 0x35, Check_RxData['产品型号'][9], 0xFF, 0xFF, 0xFF, 0xFF]
                             WriteFrame(Buffer)
                             ReadFrame()
                         # HW ver 有差异

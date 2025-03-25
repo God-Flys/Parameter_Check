@@ -8,7 +8,7 @@ from usb_device import *
 from usb2lin_ex import *
 import time
 import copy
-from compareData import Info_355, Info_355A, Info_355B
+from compareData import Info_355, Info_355A, Info_355B, Info_355C
 
 RxLINMsg = LIN_EX_MSG()
 CheckRxLINMsg = LIN_EX_MSG()
@@ -250,8 +250,13 @@ def ReadAllParameter():
                     Check_RxData = copy.deepcopy(Info_355B)
                     print('版本355B参数有差异的名称：')
                     ConsoleDisplay('版本355B参数有差异的名称：')
+                # 版本号为 355C
+                if current_text == "355C":
+                    Check_RxData = copy.deepcopy(Info_355C)
+                    print('版本355C参数有差异的名称：')
+                    ConsoleDisplay('版本355C参数有差异的名称：')
                     # 对比当前读到的参数和标准的参数，并将有差异的键提出
-                if current_text == '355' or current_text == '355B':
+                if current_text == '355' or current_text == '355B' or current_text == '355C':
                     diff = Check_RxData.keys() & current_RxData
                     ui.textEdit_2.clear()
                     for k in diff:
@@ -567,5 +572,5 @@ if __name__ == "__main__":
 
     ui.pushButton.clicked.connect(ReadAllParameter)
     ui.pushButton_2.clicked.connect(Parameter_update)
-    ui.comboBox.addItems(['355', '355A', '355B'])
+    ui.comboBox.addItems(['355', '355A', '355B', '355C'])
     sys.exit(app.exec_())
